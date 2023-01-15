@@ -255,7 +255,7 @@ impl Application {
         #[cfg(windows)]
         let signals = futures_util::stream::empty();
         #[cfg(not(windows))]
-        let signals = Signals::new([signal::SIGTSTP, signal::SIGCONT, signal::SIGUSR1])
+        let signals = Signals::new([signal::SIGTSTP, signal::SIGCONT, signal::SIGUSR1, signal::SIGWINCH])
             .context("build signal handler")?;
 
         let app = Self {
@@ -472,7 +472,7 @@ impl Application {
                 restore_term().unwrap();
                 low_level::emulate_default_handler(signal::SIGTSTP).unwrap();
             }
-            signal::SIGCONT => {
+            signal::SIGCONT | signal::SIGWINCH => {
                 self.claim_term().await.unwrap();
                 // redraw the terminal
                 let area = self.terminal.size().expect("couldn't get terminal size");
